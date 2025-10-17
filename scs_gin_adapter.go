@@ -69,6 +69,16 @@ func (ga *GinAdapter) Get(ctx *gin.Context, key string) interface{} {
 	return val
 }
 
+// Remove deletes the given key and corresponding value from the session data.
+// The session data status will be set to Modified. If the key is not present
+// this operation is a no-op.
+func (ga *GinAdapter) Remove(ctx *gin.Context, key string) {
+	ga.sm.Remove(ctx.Request.Context(), key)
+	tok, exp, _ := ga.sm.Commit(ctx.Request.Context())
+	ga.sm.WriteSessionCookie(ctx.Request.Context(), ctx.Writer, tok, exp)
+	return
+}
+
 // Destroy deletes the session data from the session store and sets the session
 // status to Destroyed. Any further operations in the same request cycle will
 // result in a new session being created.
